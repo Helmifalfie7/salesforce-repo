@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+    
+    <flow name="salesforce-app-main">
+        <http:listener config-ref="HTTP_Listener_config" path="${httpListener.path}">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="salesforce-app-config" />
+        <error-handler ref="error-handling-apikit">
+<!--             <on-error-propagate type="APIKIT:BAD_REQUEST"> -->
+<!--                 <ee:transform doc:name="Transform Message"> -->
+<!--                     <ee:message> -->
+<!--                         <ee:set-payload><![CDATA[%dw 2.0 -->
+<!-- output application/json -->
+<!-- -&#45;&#45; -->
+<!-- {message: "Bad request"}]]></ee:set-payload> -->
+<!--                     </ee:message> -->
+<!--                     <ee:variables> -->
+<!--                         <ee:set-variable variableName="httpStatus">400</ee:set-variable> -->
+<!--                     </ee:variables> -->
+<!--                 </ee:transform> -->
+<!--             </on-error-propagate> -->
+<!--             <on-error-propagate type="APIKIT:NOT_FOUND"> -->
+<!--                 <ee:transform doc:name="Transform Message"> -->
+<!--                     <ee:message> -->
+<!--                         <ee:set-payload><![CDATA[%dw 2.0 -->
+<!-- output application/json -->
+<!-- -&#45;&#45; -->
+<!-- {message: "Resource not found"}]]></ee:set-payload> -->
+<!--                     </ee:message> -->
+<!--                     <ee:variables> -->
+<!--                         <ee:set-variable variableName="httpStatus">404</ee:set-variable> -->
+<!--                     </ee:variables> -->
+<!--                 </ee:transform> -->
+<!--             </on-error-propagate> -->
+<!--             <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED"> -->
+<!--                 <ee:transform doc:name="Transform Message"> -->
+<!--                     <ee:message> -->
+<!--                         <ee:set-payload><![CDATA[%dw 2.0 -->
+<!-- output application/json -->
+<!-- -&#45;&#45; -->
+<!-- {message: "Method not allowed"}]]></ee:set-payload> -->
+<!--                     </ee:message> -->
+<!--                     <ee:variables> -->
+<!--                         <ee:set-variable variableName="httpStatus">405</ee:set-variable> -->
+<!--                     </ee:variables> -->
+<!--                 </ee:transform> -->
+<!--             </on-error-propagate> -->
+<!--             <on-error-propagate type="APIKIT:NOT_ACCEPTABLE"> -->
+<!--                 <ee:transform doc:name="Transform Message"> -->
+<!--                     <ee:message> -->
+<!--                         <ee:set-payload><![CDATA[%dw 2.0 -->
+<!-- output application/json -->
+<!-- -&#45;&#45; -->
+<!-- {message: "Not acceptable"}]]></ee:set-payload> -->
+<!--                     </ee:message> -->
+<!--                     <ee:variables> -->
+<!--                         <ee:set-variable variableName="httpStatus">406</ee:set-variable> -->
+<!--                     </ee:variables> -->
+<!--                 </ee:transform> -->
+<!--             </on-error-propagate> -->
+<!--             <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE"> -->
+<!--                 <ee:transform doc:name="Transform Message"> -->
+<!--                     <ee:message> -->
+<!--                         <ee:set-payload><![CDATA[%dw 2.0 -->
+<!-- output application/json -->
+<!-- -&#45;&#45; -->
+<!-- {message: "Unsupported media type"}]]></ee:set-payload> -->
+<!--                     </ee:message> -->
+<!--                     <ee:variables> -->
+<!--                         <ee:set-variable variableName="httpStatus">415</ee:set-variable> -->
+<!--                     </ee:variables> -->
+<!--                 </ee:transform> -->
+<!--             </on-error-propagate> -->
+<!--             <on-error-propagate type="APIKIT:NOT_IMPLEMENTED"> -->
+<!--                 <ee:transform doc:name="Transform Message"> -->
+<!--                     <ee:message> -->
+<!--                         <ee:set-payload><![CDATA[%dw 2.0 -->
+<!-- output application/json -->
+<!-- -&#45;&#45; -->
+<!-- {message: "Not Implemented"}]]></ee:set-payload> -->
+<!--                     </ee:message> -->
+<!--                     <ee:variables> -->
+<!--                         <ee:set-variable variableName="httpStatus">501</ee:set-variable> -->
+<!--                     </ee:variables> -->
+<!--                 </ee:transform> -->
+<!--             </on-error-propagate> -->
+        </error-handler>
+    </flow>
+    <flow name="get:\healthCheck:salesforce-app-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "api-name": "salesforce-app",
+  status: "UP",
+  timestamp: "2024-09-29T14:35:00Z"
+} as Object {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<error-handler ref="error-handling-app" />
+    
+</flow>
+    <flow name="get:\accounts\(accountId):salesforce-app-config">
+        <logger level="INFO" doc:name="Logger" doc:id="2b166f86-a602-4c11-8e54-f78a6294be3e" />
+		<ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="accountId"><![CDATA[attributes.uriParams.'accountId']]></ee:set-variable>
+				<ee:set-variable variableName="query" ><![CDATA[attributes.queryParams.'query']]></ee:set-variable>
+            
+</ee:variables>
+        </ee:transform>
+        <!-- [STUDIO:"Transform Message"]<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+{
+  id: "0031t00000I7ZaTAAV",
+  Title: "",
+  Surname: "Blow",
+  FirstName: "Fred",
+  Salutation: "Mr.",
+  Name: "Fred Blow",
+  BillingAddress: "123 Main Street Suite 456",
+  Description: "",
+  Industry: "Banking",
+  ParentId: "0031t00000I7ZaTAAV",
+  Phone: "555-1234",
+  Type: "Broker"
+} as Object {encoding: "UTF-8", mediaType: "application/json"}&#93;&#93;></ee:set-payload>
+            </ee:message>
+        </ee:transform> [STUDIO] -->
+		<flow-ref doc:name="getaccount" doc:id="0329313c-7c58-43ea-a69b-792914eaa854" name="getaccount"/>
+		<error-handler ref="error-handling-app" />
+    
+</flow>
+    <flow name="get:\contacts\(contactId):salesforce-app-config">
+        <logger level="INFO" doc:name="Logger" doc:id="d2fe8b59-c4c6-4646-8683-6104fd10c8fa" />
+		<ee:transform doc:name="Transform Message">
+            <ee:variables>
+				<ee:set-variable variableName="contactId" ><![CDATA[attributes.uriParams.'contactId']]></ee:set-variable>
+				<ee:set-variable variableName="query" ><![CDATA[attributes.queryParams.'query']]></ee:set-variable>
+            
+</ee:variables>
+        </ee:transform>
+        <!-- [STUDIO:"Transform Message"]<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+{
+  id: "0031t00000I7ZaTAAV",
+  Title: "",
+  Surname: "Blow",
+  FirstName: "Fred",
+  Salutation: "Mr.",
+  Name: "Fred Blow",
+  BillingAddress: "123 Main Street Suite 456",
+  Description: "",
+  Industry: "Banking",
+  ParentId: "0031t00000I7ZaTAAV",
+  Phone: "555-1234",
+  Type: "Broker"
+} as Object {encoding: "UTF-8", mediaType: "application/json"}&#93;&#93;></ee:set-payload>
+            </ee:message>
+        </ee:transform> [STUDIO] -->
+		<flow-ref doc:name="getContact" doc:id="e6f40b5c-8798-48de-8a09-24380c4c1678" name="getContact"/>
+		<error-handler ref="error-handling-app" />
+    
+</flow>
+    <flow name="post:\accounts:application\json:salesforce-app-config">
+		<logger level="INFO" doc:name="Logger" doc:id="d42f1368-a450-4e65-820f-0deda33727c8" />
+		<ee:transform doc:name="set entryData" doc:id="e9fba726-3450-46a1-9cac-cca79f8bb634" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="entryData" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="postAccount" doc:id="873c242f-6ac5-4112-aeba-2013a94a6feb" name="postAccount"/>
+		<error-handler ref="error-handling-app" />
+    
+</flow>
+    <flow name="post:\contacts" doc:id="c432bd0c-37de-4832-a2af-e11faf5984f0">
+        <logger level="INFO" doc:name="Logger" doc:id="7668b0c9-f572-46c0-881f-caa1c746b259" />
+		<flow-ref doc:name="postContact" doc:id="3f296514-a32a-4d62-823a-90d2f8c002e0" name="postContact"/>
+		<error-handler ref="error-handling-app" />
+    
+</flow>
+    <flow name="post:\opportunity" doc:id="62d12834-c6ca-4f7d-9b50-56e33ef54fb1">
+		<logger level="INFO" doc:name="Logger" doc:id="4099542c-a19a-4a00-b9a9-45ad217fb022" />
+		<flow-ref doc:name="postOpportunity" doc:id="bd488d6b-0be2-45dc-a5f5-fcf0a8720b7f" name="postOpportunity"/>
+		<error-handler ref="error-handling-app" />
+
+    </flow>
+</mule>

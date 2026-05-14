@@ -1,0 +1,9 @@
+%dw 2.0
+
+type auto_78a97a1d_274a_4803_85d8_0950a7d13a05_Output_Variables_contactId = java_io_Serializable {"typeId": "java.io.Serializable",
+"typeAlias": "Serializable"} | Null
+type java_io_Serializable = {|  |} {"typeId": "java.io.Serializable",
+"typeAlias": "Serializable"}
+
+
+

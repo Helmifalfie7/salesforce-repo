@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<configuration-properties doc:name="Configuration properties" doc:id="0f7a4b17-0151-45e4-895e-135e846fbacd" file="props/config.yaml" />
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="9b509b61-dacb-496f-b1e4-4fb2c012656b" >
+		<salesforce:jwt-connection consumerKey="${connectedApp.consumerkey}" keyStore="certs\mule_jwt.jks" storePassword="${connectedApp.storepassword}" certificateAlias="${connectedApp.certificateAlias}" principal="${connectedApp.principal}" tokenEndpoint="${connectedApp.tokenEndpoint}" audienceUrl="${connectedApp.url}"/>
+	</salesforce:sfdc-config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="fcc714cd-f873-4422-ae74-ab71aead1210" >
+		<http:listener-connection host="${httpListener.host}" port="${httpListener.port}" />
+	</http:listener-config>
+	<apikit:config name="salesforce-app-config" api="salesforce-app.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+
+</mule>

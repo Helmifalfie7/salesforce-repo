@@ -1,0 +1,188 @@
+#%RAML 1.0
+securitySchemes:
+  client_id_enforcement:
+    description: Apply this to enforce the use of a client id and secret to access API.
+    type: x-API-key
+    describedBy:
+      headers:
+        client_id:
+          description: The client id for API access
+          type: string
+          required: true
+        client_secret:
+          description: The client secret for API access
+          type: string
+          required: true
+      responses:
+        401:
+          body:
+            application/json:
+              example: !include responses/401Response.json
+              
+title: salesforce app
+version: v1
+protocols:
+  - HTTPS
+securedBy: [client_id_enforcement]
+baseUri: /salesforce/
+
+/healthCheck:
+  get:
+    description: get system health check data
+    responses:
+      200:
+        body:
+          application/json:
+            type: object
+            example: !include responses/healthCheck.json
+
+/accounts:
+  securedBy:
+    - client_id_enforcement
+  post:
+    description: post account info from client data submissions to salesforce 
+    body:
+      application/json:
+        description: account info from client data submissions to salesforce 
+        type: object
+
+    responses:
+      201:
+        description: Account successfully created
+        body:
+          application/json:
+            example: !include responses/201Response.json
+      400:
+        description: Bad request, invalid input data
+        body:
+          application/json:
+            example: !include responses/400Response.json
+      401:
+        description: Unauthorized, missing or invalid client id and secret
+        body:
+          application/json:
+            example: !include responses/401Response.json             
+      500:
+        description: Internal server error
+        body:
+          application/json:
+            example: !include responses/500Response.json 
+  /{accountId}:
+    get:
+      description: get account id/ records from salesforce by name
+      queryParameters:
+        name:
+          type: string
+          required: true
+      responses:
+        200:
+          description: get account info from salesforce
+          body:
+            application/json:
+              example: !include responses/200ResponseAccount.json
+        400:
+          description: Bad request, invalid input data
+          body:
+            application/json:
+              example: !include responses/400Response.json
+        401:
+          description: Unauthorized, missing or invalid client id and secret
+          body:
+            application/json:
+              example: !include responses/401Response.json             
+        500:
+          description: Internal server error
+          body:
+            application/json:
+              example: !include responses/500Response.json     
+/contacts:
+  securedBy:
+    - client_id_enforcement
+  /{contactId}:
+    get:
+      description: get account id/ records from salesforce by name
+      queryParameters:
+        name:
+          type: string
+          required: true
+      responses:
+        200:
+          description: get account info from salesforce
+          body:
+            application/json:
+              example: !include responses/200ResponseAccount.json
+        400:
+          description: Bad request, invalid input data
+          body:
+            application/json:
+              example: !include responses/400Response.json
+        401:
+          description: Unauthorized, missing or invalid client id and secret
+          body:
+            application/json:
+              example: !include responses/401Response.json             
+        500:
+          description: Internal server error
+          body:
+            application/json:
+              example: !include responses/500Response.json     
+  post:
+    description: post contact info from client data submissions to salesforce 
+    body:
+      application/json:
+        description: contact info from client data submissions to salesforce 
+        type: object
+
+    responses:
+      201:
+        description: Contact successfully created
+        body:
+          application/json:
+            example: !include responses/201ResponseContact.json
+      400:
+        description: Bad request, invalid input data
+        body:
+          application/json:
+            example: !include responses/400Response.json
+      401:
+        description: Unauthorized, missing or invalid client id and secret
+        body:
+          application/json:
+            example: !include responses/401Response.json             
+      500:
+        description: Internal server error
+        body:
+          application/json:
+            example: !include responses/500Response.json 
+              
+/opportunity:
+  securedBy:
+    - client_id_enforcement
+  post:
+    description: post opportunity info from client data submissions to salesforce 
+    body:
+      application/json:
+        description: opportunity info from client data submissions to salesforce 
+        type: object
+
+    responses:
+      201:
+        description: Contact successfully created
+        body:
+          application/json:
+            example: !include responses/201ResponseOpportunity.json
+      400:
+        description: Bad request, invalid input data
+        body:
+          application/json:
+            example: !include responses/400Response.json
+      401:
+        description: Unauthorized, missing or invalid client id and secret
+        body:
+          application/json:
+            example: !include responses/401Response.json             
+      500:
+        description: Internal server error
+        body:
+          application/json:
+            example: !include responses/500Response.json 

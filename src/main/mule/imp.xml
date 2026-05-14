@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="postAccount" doc:id="4ade5530-bbae-4af1-bc7f-11fb96fe54db" >
+		<logger level="INFO" doc:name="start flow" doc:id="a83200c6-3217-45f9-9a56-eb1101c75b7d" message="start post account flow"/>
+		<set-variable value="#[payload.pages.prompts.insured_name.answer.value[0]]" doc:name="clientName" doc:id="913167a6-ae59-4fa2-8fb0-e2743a79f4f4" variableName="clientName"/>
+		<choice doc:name="Choice" doc:id="b3572cba-4370-4230-a72f-c3a4f93c1685" >
+			<when expression="#[not isBlank(vars.clientName default '')]">
+				<salesforce:query doc:name="check client" doc:id="b18166bb-4777-450f-bfd2-d179bb0569ee" config-ref="Salesforce_Config" target="checkclient">
+			<salesforce:salesforce-query><![CDATA[SELECT id, name FROM Account WHERE name = ':Name']]></salesforce:salesforce-query>
+			<salesforce:parameters><![CDATA[#[output application/java
+---
+{
+	"Name" : vars.clientName
+}]]]></salesforce:parameters>
+		</salesforce:query>
+				<choice doc:name="Choice" doc:id="1f05cb36-70e0-4b5a-8576-334507343d2e">
+			<when expression="#[!isEmpty(vars.checkclient)]">
+				<set-variable value="#[vars.checkclient.Id[0]]" doc:name="accountId2" doc:id="715a7909-8533-4b00-a572-2f07738d7d25" variableName="accountId2" />
+				<logger level="INFO" doc:name="account info" doc:id="71dba27c-c01f-4131-9c01-4e649cec1f52" message="account exist with id: #[vars.accountId]" />
+			</when>
+					<otherwise>
+				<ee:transform doc:name="prepareAcountData" doc:id="2906d360-6537-4c0b-aff1-3c729b798b5d">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+[{
+    //"Title": vars.entryData.Title,
+    "Name": vars.entryData.pages.prompts.insured_name.answer.value[0] ,
+    "Type": "Broker",
+    //"AccountNumber": vars.entryData.AccountNumber, 
+    // "OwnerId": vars.entryData.OwnerId,
+    //"Site": vars.entryData.Site,
+    //"AccountSource": vars.entryData.AccountSource,
+    //"AnnualRevenue": vars.entryData.AnnualRevenue,
+    "BillingStreet": vars.entryData.pages.prompts.billing.answer.value[0],
+    //"Jigsaw": vars.entryData.Jigsaw,
+    "Description": vars.entryData.pages.prompts.description.answer.value[0],
+   // "Tier": vars.entryData.Tier,
+    //"NumberOfEmployees": vars.entryData.pages.prompts.employees.answer.value[0],
+    //"Fax": vars.entryData.Fax,
+    "Industry": vars.entryData.pages.prompts.industry.answer.value[0],
+    //"Ownership": vars.entryData.Ownership
+}]]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<salesforce:create type="Account" doc:name="Create account" doc:id="47798cd9-f48b-4fdd-84d0-d2ed78b72708" config-ref="Salesforce_Config" target="accountResp" />
+				<choice doc:name="Choice" doc:id="fbb756e2-d71e-4c4b-8b7e-6cd290e4f401">
+					<when expression="#[vars.accountResp.successful]">
+						<set-variable value="#[vars.accountResp.items[0].id]" doc:name="Set accountId" doc:id="b8254bc9-d955-4891-ac0c-ebbda7f21adb" variableName="accountId" />
+						<logger level="INFO" doc:name="accountId" doc:id="13201731-2273-4e0f-b641-868e892c2744" message='#["account created : " ++ vars.accountId]' />
+					</when>
+					<otherwise>
+						<set-variable value="#[%dw 2.0&#10;output application/json&#10;---&#10;error.exception.localizedMessage default error.exception.message]" doc:name="Set Variable" doc:id="94c96fc5-c708-4a78-ad1f-6e3419ec4f95" variableName="errorDesc" />
+						<logger level="INFO" doc:name="Logger error" doc:id="79501533-dc16-4368-83c6-8bcbfe7ced70" message="#[vars.errorDesc]" />
+						<raise-error doc:name="Raise error" doc:id="a11cc67b-d9d7-429c-922a-d046f2dbc4a9" type="APP:ERROR_CREATE_ACCOUNT" description="error while creation a account" />
+					</otherwise>
+				</choice>
+			</otherwise>
+		</choice>
+				<logger level="INFO" doc:name="end flow" doc:id="6561df75-01c0-4644-a5c2-8dc86c46c4e6" message="end post account flow" />
+				<flow-ref doc:name="post contact" doc:id="0063da48-8107-4ed5-a0b4-0eccc6a41914" name="post:\contacts" />
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="436ced43-4c9a-4a7d-959c-a94336839576" message="account name not found"/>
+			</otherwise>
+		</choice>
+		<error-handler ref="error-handling-app" />
+	</flow>
+	<flow name="postContact" doc:id="11d42a1f-4306-4795-bd70-5aeb56764100" >
+		<logger level="INFO" doc:name="start flow" doc:id="82d82b26-7c42-4ff4-b77d-d897400a3927" message="start post contact flow" />
+		<!-- [STUDIO:"emailcheck"]<set-variable value='#[(vars.entryData.pages.prompts.contactEmail.answer.value[0&#93; replace /\s+/ with "") ++ "@contact.com"&#93;' doc:name="emailcheck" doc:id="28ffcfab-08a7-4a1c-b976-9c4efe31b2fb" variableName="emailcheck"/> [STUDIO] -->
+		<ee:transform doc:name="emailcheck" doc:id="ed569fba-6447-41bb-9833-5ce59455f662" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="emailcheck" ><![CDATA[%dw 2.0
+output application/json
+
+fun generateEmail() = 
+    "contact" 
+    ++ now() as String {format: "yyyyMMddHHmmss"}
+    ++ "@contact.com"
+---
+generateEmail()]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<salesforce:query doc:name="check existingcontact" doc:id="9b6d0bb0-0319-44b1-a93a-981f0ffce4c2" config-ref="Salesforce_Config" target="checkContact">
+			<salesforce:salesforce-query ><![CDATA[SELECT id, Email FROM Contact WHERE email = ':Email']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"Email" : vars.emailcheck
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<choice doc:name="Choice" doc:id="cb8c6a3f-e387-4687-ad0b-c6c18d7b1d60" >
+			<when expression="#[!isEmpty(vars.checkContact)]">
+				<set-variable value="#[vars.checkContact.Id[0]]" doc:name="contactId2" doc:id="33af807c-68cb-45e0-959d-1cd27418ba27" variableName="contactId2" />
+				<logger level="INFO" doc:name="account info" doc:id="996d6ade-4b9a-4d76-a7c0-190350448483" message="account exist with id: #[vars.accountId]" />
+			</when>
+			<otherwise >
+				<ee:transform doc:name="prepareContactData" doc:id="fa02dfc4-83c0-4b01-81e6-74a086594d6b">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+[{
+    
+    "AccountId": vars.accountId default vars.accountId2 , //accountId
+    //"AssistantName": (vars.entryData.pages.prompts.contacts.answer.value)reduce ($),
+    //"AssistantPhone": vars.entryData.AssistantPhone,
+    //"Birthdate": vars.entryData.Birthdate,
+    //"CurrencyIsoCode": vars.entryData.CurrencyIsoCode,
+    //"OwnerId": vars.entryData.OwnerId,
+    //"Jigsaw": vars.entryData.Jigsaw,
+   // "Department": vars.entryData.Department,
+    //"Description": vars.entryData.Description,
+    //"DoNotCall": vars.entryData.DoNotCall,
+    "Email": vars.emailcheck ,
+    //"Email":  "contact@email.com",
+    //"HasOptedOutOfEmail": vars.entryData.HasOptedOutOfEmail,
+    //"Fax": vars.entryData.Fax,
+    //"HasOptedOutOfFax": vars.entryData.HasOptedOutOfFax,
+    //"HomePhone": vars.entryData.HOmephone,
+    //"LeadSource": vars.entryData.LeadSource,
+    //"MailingAddress": vars.entryData.MailingAddress,
+    //"MobilePhone": vars.entryData.pages.prompts.contactPhone.answer.value[0],
+    "LastName": vars.entryData.pages.prompts.insured_name.answer.value[0] default "Broker",
+    //"OtherAddress": vars.entryData.OtherAddress,
+    //"OtherPhone": vars.entryData.OtherPhone,
+    //"Phone": vars.entryData.Phone,
+    //"ReportsToId": vars.entryData.ReportsToId,
+    "Title": vars.entryData.pages.prompts.project_name.answer.value[0] //tocheck
+
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<salesforce:create type="Contact" doc:name="Create contact" doc:id="33a86c6f-9dbe-4aea-8fbb-f0ecede6c9b2" config-ref="Salesforce_Config" target="contactResp" />
+				<choice doc:name="Choice" doc:id="21b7bb48-89a7-43a7-8516-b0430b14ae2c">
+			<when expression="#[vars.contactResp.successful]">
+				<set-variable value="#[vars.contactResp.items[0].id]" doc:name="Set contactId" doc:id="e42decd4-1f97-4622-838f-817fef463331" variableName="contactId" />
+				<logger level="INFO" doc:name="contactId" doc:id="712ab294-6880-4310-a96f-e8b02a660a52" message='#["contact created "]' />
+			</when>
+			<otherwise>
+				<set-variable value="#[%dw 2.0&#10;output application/json&#10;---&#10;error.exception.localizedMessage default error.exception.message]" doc:name="Set Variable" doc:id="6c31ad5d-c8e9-470c-bfdc-2cf0d31c45d1" variableName="errorDesc" />
+				<logger level="INFO" doc:name="Logger error" doc:id="70b4b0ac-cd6a-4f97-a97b-0cfe7c7327b0" message="#[vars.errorDesc]" />
+				<raise-error doc:name="Raise error" doc:id="11866b71-7ec4-4cff-8a68-cf587c23a385" type="APP:ERROR_CREATE_CONTACT" description="error while creation a contact" />
+			</otherwise>
+		</choice>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="end flow" doc:id="dd4dab2b-25d1-4fb3-ac45-4e8fc7a42c2d" message="end post contact flow" />
+		<flow-ref doc:name="post opportunity" doc:id="899e93b5-38eb-4f1d-b93c-4621787f635c" name="post:\opportunity" />
+		<error-handler ref="error-handling-app" />
+	</flow>
+	<flow name="postOpportunity" doc:id="78a97a1d-274a-4803-85d8-0950a7d13a05" >
+		<logger level="INFO" doc:name="Logger" doc:id="ac214ff4-86df-4a32-9413-06e807130309" />
+		<ee:transform doc:name="date" doc:id="4b4edf22-5df6-49bd-8a42-5375c0b8126b" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="closeDate" ><![CDATA[%dw 2.0
+output application/json
+
+---
+{
+    date: ((now() + |P10D|) as Date {format: "yyyy-MM-dd"}) as String {format: "yyyy-MM-dd"}
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="prepareOpportunityData" doc:id="39608ea0-e80b-452f-8e9b-b84a2275045e">
+			<ee:message>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="dataOpportunity" ><![CDATA[%dw 2.0
+output application/java
+---
+[{
+    "AccountId": vars.accountId default vars.accountId2 ,//accountId
+    //"Amount": (vars.entryData.pages.prompts.policy_limit.answer.value)reduce ($),
+    //"Budget_Confirmed__c": vars.entryData.Budget_Confirmed__c,
+    //"CloseDate": vars.entryData.deadline.answer.value,
+    "ContactId": vars.contactId default vars.contactId2 , //contactId
+    "Description": vars.entryData.pages.prompts.description.answer.value[0],
+    "Type": "Tax", //recordtype
+    "Product_Sub_Type__c": "Other",//
+    "Claim_Status__c": "N/A",
+    //"CloseDate": "2026-04-30",
+    "CloseDate": ((now() + |P10D|) as Date {format: "YYYY-MM-DD"})  ,
+    
+    //"Discovery_Completed__c": vars.entryData.Discovery_Completed__c,
+    //"ExpectedRevenue": vars.entryData.ExpectedRevenue,
+    //"ForecastCategoryName": vars.entryData.ForecastCategoryName,
+    //"LeadSource": vars.entryData.LeadSource,
+    //"Loss_Reason__c": vars.entryData.Loss_Reason__c,
+    //"NextStep": vars.entryData.NextStep,
+    //"CurrencyIsoCode": vars.entryData.CurrencyIsoCode,
+    "Name": vars.entryData.pages.prompts.project_name.answer.value[0] default vars.entryData.pages.prompts.insured_name.answer.value[0] ,
+    //"OwnerId": vars.entryData.OwnerId,
+    //"IqScore": vars.entryData.IqScore,
+    //"Pricebook2Id": vars.entryData.Pricebook2Id,
+    //"CampaignId": vars.entryData.CampaignId,
+    //"IsPrivate": vars.entryData.IsPrivate,
+    //"Probability": vars.entryData.Probability,
+    //"TotalOpportunityQuantity": vars.entryData.TotalOpportunityQuantity,
+    //"ROI_Analysis_Completed__c": vars.entryData.ROI_Analysis_Completed__c,
+    //"StageName": vars.entryData.StageName,
+    //"Type": vars.entryData.pages.prompts.policy_type.answer.value
+}]]]></ee:set-variable>
+			</ee:variables>
+		
+</ee:transform>
+		<salesforce:query doc:name="checkOpportunity" doc:id="67c58474-32ba-4e6c-802f-80e8f98f0710" config-ref="Salesforce_Config" target="checkOpportunity">
+			<salesforce:salesforce-query ><![CDATA[SELECT Name, accountId FROM Opportunity WHERE name =':Name']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"Name" : vars.dataOpportunity.Name
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<choice doc:name="Choice" doc:id="9856a937-7005-478b-98ee-9898baa4e903" >
+			<when expression="#[!isEmpty(vars.checkOpportunity)]">
+				<logger level="INFO" doc:name="Logger" doc:id="7252c3ac-d1ac-4e75-adfb-120d141cb2bb" message="Opportunity already exist"/>
+			</when>
+			<otherwise >
+				<salesforce:create type="Opportunity" doc:name="Create Opportunity" doc:id="15344f95-fb1e-498c-9bc0-42da49202d45" config-ref="Salesforce_Config" target="opportunityResp" >
+					<salesforce:records ><![CDATA[#[vars.dataOpportunity]]]></salesforce:records>
+				</salesforce:create>
+				<choice doc:name="Choice" doc:id="2dfe5ae4-11fa-4a7c-a9d2-25051238a9ce">
+			<when expression="#[vars.opportunityResp.successful]">
+				<set-variable value="#[vars.opportunityResp.items[0].id]" doc:name="Set opportunityId" doc:id="f585b75a-f6da-435d-8f01-8aee61d7b55b" variableName="opportunityId" />
+				<logger level="INFO" doc:name="opportunityId" doc:id="df40a814-ff0f-4cce-9718-6e48c38428e2" message='#["person account created : " ++ vars.opportunityId]' />
+			</when>
+			<otherwise>
+				<set-variable value="#[%dw 2.0&#10;output application/json&#10;---&#10;error.exception.localizedMessage default error.exception.message]" doc:name="Set Variable" doc:id="d0023dc6-9823-4712-b0da-fd851ac136c7" variableName="errorDesc" />
+				<logger level="INFO" doc:name="Logger error" doc:id="842db6f0-a4e9-46aa-8543-36f60dc399c6" message="#[vars.errorDesc]" />
+				<raise-error doc:name="Raise error" doc:id="6a8607fd-1f52-4693-bf9e-cc6bdbffb8d5" type="APP:ERROR_CREATE_OPPORTUNITY" description="error while creation a opportunity" />
+			</otherwise>
+		</choice>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="end flow" doc:id="de808138-556f-4acf-9027-e97e32e8bb82" message="end post opportunity flow" />
+		<error-handler ref="error-handling-app" />
+	</flow>
+	<flow name="getContact" doc:id="7d055947-21eb-45ce-b54f-76998601c77e" >
+		<logger level="INFO" doc:name="Logger" doc:id="c3e2bddf-a9ce-4136-85b0-c21ca8ef6fc0" />
+		<choice doc:name="Choice" doc:id="f4355c17-6e06-42de-913e-9438d9793cb7" >
+			<when expression='#[vars.query == "mail"]'>
+				<salesforce:query doc:name="get contact by mail" doc:id="9849566c-7203-4ca3-a0dd-2e8901600494" config-ref="Salesforce_Config" target="contactfields" >
+					<salesforce:salesforce-query ><![CDATA[SELECT  Id, 
+		AccountId ,
+		Name, 
+		Email, 
+		Title, 
+		CurrencyIsoCode, 
+		OwnerId, 
+		CreatedById
+ 
+FROM Contact
+WHERE Email =':Email']]></salesforce:salesforce-query>
+					<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	Email : vars.contactId
+}]]]></salesforce:parameters>
+				</salesforce:query>
+			</when>
+			<otherwise >
+				<salesforce:query doc:name="get contact by Id" doc:id="03cc6dfd-e9c7-4ce0-b182-141839da8234" config-ref="Salesforce_Config" target="contactfields">
+			<salesforce:salesforce-query><![CDATA[SELECT  Id, 
+		AccountId ,
+		Name, 
+		Email, 
+		Title, 
+		CurrencyIsoCode, 
+		OwnerId, 
+		CreatedById
+ 
+FROM Contact
+WHERE Id =':contactId']]></salesforce:salesforce-query>
+			<salesforce:parameters><![CDATA[#[output application/java
+---
+{
+	contactId : vars.contactId
+}]]]></salesforce:parameters>
+		</salesforce:query>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="outputcontact" doc:id="f344c509-4948-4629-be6d-3dcbe3f0e1e1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.contactfields[0]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="ac11bc19-9f51-404f-b24b-056f758f45bc" message="#[vars.contactId]"/>
+		<error-handler ref="error-handling-app" />
+	</flow>
+	<flow name="getaccount" doc:id="9d544bc0-bcb3-47ce-baed-60082dd8e641" >
+		<logger level="INFO" doc:name="Logger" doc:id="bd180a0e-f38b-4a6e-9940-521f952999f5" />
+		<choice doc:name="Choice" doc:id="82077f0d-b497-4bb5-ac4c-410c7cf098dc" >
+			<when expression='#[vars.query == "name"]'>
+				<salesforce:query doc:name="get account byname" doc:id="debfee34-93ea-4a3e-bb0d-35c6f3b89901" config-ref="Salesforce_Config" target="accountfields" >
+					<salesforce:salesforce-query ><![CDATA[SELECT  Id,
+        Name,
+        ParentId,
+        BillingStreet,
+        Phone,
+        Industry,
+        NumberOfEmployees,
+        Description,
+        CreatedById,
+        LastActivityDate
+
+FROM Account
+WHERE Name = ':Name']]></salesforce:salesforce-query>
+					<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	Name : vars.accountId
+}]]]></salesforce:parameters>
+				</salesforce:query>
+			</when>
+			<otherwise >
+				<salesforce:query doc:name="get account by Id" doc:id="6a7fb6ee-d222-466f-ad67-a9ac5b877e0d" config-ref="Salesforce_Config" target="accountfields">
+			<salesforce:salesforce-query><![CDATA[SELECT  Id,
+        Name,
+        ParentId,
+        BillingStreet,
+        Phone,
+        Industry,
+        NumberOfEmployees,
+        Description,
+        CreatedById,
+        LastActivityDate
+
+FROM Account
+WHERE Id = ':accountId']]></salesforce:salesforce-query>
+			<salesforce:parameters><![CDATA[#[output application/java
+---
+{
+	accountId : vars.accountId
+}]]]></salesforce:parameters>
+		</salesforce:query>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="outputcontact" doc:id="2a91e4f7-c868-4c2a-8cad-6b01def93f03" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.accountfields[0]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="f61e40dc-6786-4da2-9c0e-0c9701a3223b" message="#[vars.accountId]"/>
+		<error-handler ref="error-handling-app" />
+	</flow>
+	<!-- [STUDIO:"impFlow"]<flow name="impFlow" doc:id="ac0d7911-ca5a-4149-844d-35ee72b7f5fd" >
+	<salesforce:new-object-listener 
+    objectType="Account" 
+    doc:name="On New account" 
+    doc:id="749acbdc-36e0-4481-8e73-fc43e7743715" 
+    config-ref="Salesforce_Config">
+    
+    <scheduling-strategy>
+        <fixed-frequency frequency="4000"/>
+    </scheduling-strategy>
+
+</salesforce:new-object-listener>
+		<ee:transform doc:name="Transform Message" doc:id="2cdde392-4688-4dd4-a0de-b74485a5472f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+&#45;&#45;-
+payload&#93;&#93;></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="d6022ba2-67db-4813-816a-1eed31e12fe9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+payload&#93;&#93;></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="7b42ecbc-dbff-4bf3-a940-24e371624b09" message="#[payload&#93;"/>
+	</flow> [STUDIO] -->
+
+</mule>

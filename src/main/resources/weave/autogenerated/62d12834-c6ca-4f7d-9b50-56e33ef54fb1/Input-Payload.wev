@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_62d12834_c6ca_4f7d_9b50_56e33ef54fb1_Input_Payload = { _?: Any } {"description": "opportunity info from client data submissions to salesforce"}
+

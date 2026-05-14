@@ -1,0 +1,10 @@
+{
+    "status": 500,
+    "responseId": "df8179d0-6c51-11ef-a176-065bb88b5be1",
+    "transactionDate": "2024-09-06T13:14:00.587Z",
+    "data": {
+        "errorCode": "Er002",
+        "errorType": "object not found",
+        "errorDescription": "global_error_message"
+    }
+}

@@ -1,0 +1,18 @@
+connectedApp:
+    consumerkey: '3MVG94RxwSHvjCi85ElGmSZsP5PR_tyB75fFf_j0L4k3zzi6B8lqDrkH6nHeuyVtZldT5wDY_V903SsOk.Ind'
+    keystore: 'mule_jwt.jks'
+    storepassword: 'mulesoft'
+    certificateAlias: 'mule_jwt_cert'
+    principal: 'hamdi.arem@devonshire.develop'
+    tokenEndpoint: 'https://test.salesforce.com/services/oauth2/token'
+    url: 'https://test.salesforce.com'
+
+api:
+    id: '2727277'
+    
+httpListener:
+    port: "8081"
+    host: "0.0.0.0"
+    path: "/api/*"
+    consolepath: "/console/*"
+    idleTimeout: "30000"
