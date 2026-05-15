@@ -31,22 +31,13 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 output application/java
 ---
 [{
-    //"Title": vars.entryData.Title,
+    
     "Name": vars.entryData.pages.prompts.insured_name.answer.value[0] ,
-    "Type": "Broker",
-    //"AccountNumber": vars.entryData.AccountNumber, 
-    // "OwnerId": vars.entryData.OwnerId,
-    //"Site": vars.entryData.Site,
-    //"AccountSource": vars.entryData.AccountSource,
-    //"AnnualRevenue": vars.entryData.AnnualRevenue,
+    "Type": vars.entryData.pages.prompts.contacts.answer.value[0],
     "BillingStreet": vars.entryData.pages.prompts.billing.answer.value[0],
-    //"Jigsaw": vars.entryData.Jigsaw,
     "Description": vars.entryData.pages.prompts.description.answer.value[0],
-   // "Tier": vars.entryData.Tier,
-    //"NumberOfEmployees": vars.entryData.pages.prompts.employees.answer.value[0],
-    //"Fax": vars.entryData.Fax,
     "Industry": vars.entryData.pages.prompts.industry.answer.value[0],
-    //"Ownership": vars.entryData.Ownership
+
 }]]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
@@ -82,13 +73,8 @@ output application/java
 			<ee:variables >
 				<ee:set-variable variableName="emailcheck" ><![CDATA[%dw 2.0
 output application/json
-
-fun generateEmail() = 
-    "contact" 
-    ++ now() as String {format: "yyyyMMddHHmmss"}
-    ++ "@contact.com"
 ---
-generateEmail()]]></ee:set-variable>
+vars.entryData.pages.prompts.contactEmail.answer.value[0]]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
 		<salesforce:query doc:name="check existingcontact" doc:id="9b6d0bb0-0319-44b1-a93a-981f0ffce4c2" config-ref="Salesforce_Config" target="checkContact">
@@ -102,7 +88,7 @@ generateEmail()]]></ee:set-variable>
 		<choice doc:name="Choice" doc:id="cb8c6a3f-e387-4687-ad0b-c6c18d7b1d60" >
 			<when expression="#[!isEmpty(vars.checkContact)]">
 				<set-variable value="#[vars.checkContact.Id[0]]" doc:name="contactId2" doc:id="33af807c-68cb-45e0-959d-1cd27418ba27" variableName="contactId2" />
-				<logger level="INFO" doc:name="account info" doc:id="996d6ade-4b9a-4d76-a7c0-190350448483" message="account exist with id: #[vars.accountId]" />
+				<logger level="INFO" doc:name="contact info" doc:id="996d6ade-4b9a-4d76-a7c0-190350448483" message="contact exist with id: #[vars.accountId]" />
 			</when>
 			<otherwise >
 				<ee:transform doc:name="prepareContactData" doc:id="fa02dfc4-83c0-4b01-81e6-74a086594d6b">
@@ -113,29 +99,8 @@ output application/java
 [{
     
     "AccountId": vars.accountId default vars.accountId2 , //accountId
-    //"AssistantName": (vars.entryData.pages.prompts.contacts.answer.value)reduce ($),
-    //"AssistantPhone": vars.entryData.AssistantPhone,
-    //"Birthdate": vars.entryData.Birthdate,
-    //"CurrencyIsoCode": vars.entryData.CurrencyIsoCode,
-    //"OwnerId": vars.entryData.OwnerId,
-    //"Jigsaw": vars.entryData.Jigsaw,
-   // "Department": vars.entryData.Department,
-    //"Description": vars.entryData.Description,
-    //"DoNotCall": vars.entryData.DoNotCall,
     "Email": vars.emailcheck ,
-    //"Email":  "contact@email.com",
-    //"HasOptedOutOfEmail": vars.entryData.HasOptedOutOfEmail,
-    //"Fax": vars.entryData.Fax,
-    //"HasOptedOutOfFax": vars.entryData.HasOptedOutOfFax,
-    //"HomePhone": vars.entryData.HOmephone,
-    //"LeadSource": vars.entryData.LeadSource,
-    //"MailingAddress": vars.entryData.MailingAddress,
-    //"MobilePhone": vars.entryData.pages.prompts.contactPhone.answer.value[0],
     "LastName": vars.entryData.pages.prompts.insured_name.answer.value[0] default "Broker",
-    //"OtherAddress": vars.entryData.OtherAddress,
-    //"OtherPhone": vars.entryData.OtherPhone,
-    //"Phone": vars.entryData.Phone,
-    //"ReportsToId": vars.entryData.ReportsToId,
     "Title": vars.entryData.pages.prompts.project_name.answer.value[0] //tocheck
 
 }]]]></ee:set-payload>
@@ -161,19 +126,6 @@ output application/java
 	</flow>
 	<flow name="postOpportunity" doc:id="78a97a1d-274a-4803-85d8-0950a7d13a05" >
 		<logger level="INFO" doc:name="Logger" doc:id="ac214ff4-86df-4a32-9413-06e807130309" />
-		<ee:transform doc:name="date" doc:id="4b4edf22-5df6-49bd-8a42-5375c0b8126b" >
-			<ee:message >
-			</ee:message>
-			<ee:variables >
-				<ee:set-variable variableName="closeDate" ><![CDATA[%dw 2.0
-output application/json
-
----
-{
-    date: ((now() + |P10D|) as Date {format: "yyyy-MM-dd"}) as String {format: "yyyy-MM-dd"}
-}]]></ee:set-variable>
-			</ee:variables>
-		</ee:transform>
 		<ee:transform doc:name="prepareOpportunityData" doc:id="39608ea0-e80b-452f-8e9b-b84a2275045e">
 			<ee:message>
 			</ee:message>
@@ -183,35 +135,14 @@ output application/java
 ---
 [{
     "AccountId": vars.accountId default vars.accountId2 ,//accountId
-    //"Amount": (vars.entryData.pages.prompts.policy_limit.answer.value)reduce ($),
-    //"Budget_Confirmed__c": vars.entryData.Budget_Confirmed__c,
-    //"CloseDate": vars.entryData.deadline.answer.value,
     "ContactId": vars.contactId default vars.contactId2 , //contactId
     "Description": vars.entryData.pages.prompts.description.answer.value[0],
-    "Type": "Tax", //recordtype
-    "Product_Sub_Type__c": "Other",//
-    "Claim_Status__c": "N/A",
-    //"CloseDate": "2026-04-30",
-    "CloseDate": ((now() + |P10D|) as Date {format: "YYYY-MM-DD"})  ,
-    
-    //"Discovery_Completed__c": vars.entryData.Discovery_Completed__c,
-    //"ExpectedRevenue": vars.entryData.ExpectedRevenue,
-    //"ForecastCategoryName": vars.entryData.ForecastCategoryName,
-    //"LeadSource": vars.entryData.LeadSource,
-    //"Loss_Reason__c": vars.entryData.Loss_Reason__c,
-    //"NextStep": vars.entryData.NextStep,
-    //"CurrencyIsoCode": vars.entryData.CurrencyIsoCode,
+    "Type": vars.entryData.pages.prompts.tax_risk.answer.value[0],
+    "Product_Sub_Type__c": vars.entryData.pages.prompts.policy_type.answer.value[0],//
+    "Claim_Status__c": vars.entryData.pages.prompts.description.answer.value[0],
+    "CloseDate": vars.entryData.pages.prompts.deadline.answer.value[0]  ,
     "Name": vars.entryData.pages.prompts.project_name.answer.value[0] default vars.entryData.pages.prompts.insured_name.answer.value[0] ,
-    //"OwnerId": vars.entryData.OwnerId,
-    //"IqScore": vars.entryData.IqScore,
-    //"Pricebook2Id": vars.entryData.Pricebook2Id,
-    //"CampaignId": vars.entryData.CampaignId,
-    //"IsPrivate": vars.entryData.IsPrivate,
-    //"Probability": vars.entryData.Probability,
-    //"TotalOpportunityQuantity": vars.entryData.TotalOpportunityQuantity,
-    //"ROI_Analysis_Completed__c": vars.entryData.ROI_Analysis_Completed__c,
-    //"StageName": vars.entryData.StageName,
-    //"Type": vars.entryData.pages.prompts.policy_type.answer.value
+
 }]]]></ee:set-variable>
 			</ee:variables>
 		
