@@ -9,9 +9,9 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 http://www.mulesoft.org/schema/mule/cloudhub http://www.mulesoft.org/schema/mule/cloudhub/current/mule-cloudhub.xsd">
 	
 	<!-- define soapfaultResponse variable to true at the begin of the API (before the APIKIT) if soap message and need a soapfault response -->
-	<error-handler name="error-handling-apikit" doc:id="b32b7a19-5492-4343-8917-70c41c8d627c" >
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="b0a46fa2-702f-454a-b214-07139b3e31a7" type="APIKIT:BAD_REQUEST">
-			<ee:transform doc:name="Set HTTP Status = 400 &amp; errCode" doc:id="7cff083b-551f-4cb7-a071-8fd26e4a2dbf">
+	<error-handler name="error-handling-apikit" doc:id="5b45b9f0-c434-465f-91ef-77586e78bb02" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="993e342a-f8b7-4f1f-bbb5-f2cb04624c72" type="APIKIT:BAD_REQUEST">
+			<ee:transform doc:name="Set HTTP Status = 400 &amp; errCode" doc:id="d60461f3-6449-4af7-9323-af552a187712">
 				<ee:message />
 				<ee:variables>
 					<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
@@ -24,11 +24,11 @@ output application/java
 p('error.badRequest.code')]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
-			<flow-ref doc:name="error-handling:\response" doc:id="f29dde10-0176-4f42-9f2c-fd3c0898adba" name="error-handling:\response" />
+			<flow-ref doc:name="error-handling:\response" doc:id="3d2a0b01-9f7f-468c-a77a-b57476b09b06" name="error-handling:\response" />
 		
 </on-error-propagate>   
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="01946a15-c9e3-4e47-b196-6ac37d3e29d7" type="APIKIT:NOT_FOUND" >
-			<ee:transform doc:name="Set HTTP Status = 404 &amp; errCode" doc:id="760fde91-e8fd-4b0e-ba17-5a40fffda8d0">
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="97984cd5-afa1-4928-852b-517bbccd0bf5" type="APIKIT:NOT_FOUND" >
+			<ee:transform doc:name="Set HTTP Status = 404 &amp; errCode" doc:id="c523721a-1643-4549-a02a-d0286c877e16">
 				<ee:message />
 				<ee:variables>
 					<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
@@ -41,11 +41,11 @@ output application/java
 p('error.notFound.code')]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
-			<flow-ref doc:name="error-handling:\response" doc:id="3d77fb8b-3b7c-487a-8e99-a63b68101d13" name="error-handling:\response" />
+			<flow-ref doc:name="error-handling:\response" doc:id="a0cb93b6-c19b-4f2e-9889-b3e30ef9e8d5" name="error-handling:\response" />
 		
 </on-error-propagate>	
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="c8ef977d-3084-452d-a7ae-9b98d9e2de0f" type="APIKIT:METHOD_NOT_ALLOWED" >
-			<ee:transform doc:name="Set HTTP Status = 405 &amp; errCode" doc:id="08cfa859-2bc5-49e0-a2cd-312a2a0de6b0">
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="a9d1fb86-7926-4946-b06f-87db7bc64991" type="APIKIT:METHOD_NOT_ALLOWED" >
+			<ee:transform doc:name="Set HTTP Status = 405 &amp; errCode" doc:id="4608aacf-c56c-4c31-9659-da4b7b42debe">
 				<ee:message />
 				<ee:variables>
 					<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
@@ -58,11 +58,11 @@ output application/java
 p('error.notAllowed.code')]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
-			<flow-ref doc:name="error-handling:\response" doc:id="9f102bba-8e27-4746-a384-3adb9c9af291" name="error-handling:\response" />
+			<flow-ref doc:name="error-handling:\response" doc:id="792c46f9-bec8-475c-9a4b-f1c56235122e" name="error-handling:\response" />
 		
 </on-error-propagate>
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="57eb57f8-9392-4d21-9730-f4f14f159cf1" type="APIKIT:NOT_ACCEPTABLE" >
-			<ee:transform doc:name="Set HTTP Status = 406 &amp; errCode" doc:id="fcff0f87-9a07-4a3d-9d17-1e345dec844b">
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="cdbf4085-8bc4-43c3-b666-92b542c0f29c" type="APIKIT:NOT_ACCEPTABLE" >
+			<ee:transform doc:name="Set HTTP Status = 406 &amp; errCode" doc:id="11814c88-3179-4337-b339-718ab64f0d2b">
 				<ee:message />
 				<ee:variables>
 					<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
@@ -75,11 +75,11 @@ output application/java
 p('error.notAcceptable.code')]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
-			<flow-ref doc:name="error-handling:\response" doc:id="f143e4ec-8137-42b4-81b6-ac99b42723ba" name="error-handling:\response" />
+			<flow-ref doc:name="error-handling:\response" doc:id="7a3ea5db-27f7-473f-8a4d-dbc9964838b3" name="error-handling:\response" />
 		
 </on-error-propagate>
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="5042e70a-ef4c-455d-a398-bd5e2eec773e" type="APIKIT:UNSUPPORTED_MEDIA_TYPE" >
-			<ee:transform doc:name="Set HTTP Status = 415 &amp; errCode" doc:id="47490122-501e-4d16-8630-12b5767eead6">
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="c7c91595-41e9-4817-8d7b-71a89e5b7191" type="APIKIT:UNSUPPORTED_MEDIA_TYPE" >
+			<ee:transform doc:name="Set HTTP Status = 415 &amp; errCode" doc:id="6efc7734-3143-4a7b-9739-3f2737ac70c1">
 				<ee:message />
 				<ee:variables>
 					<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
@@ -92,11 +92,11 @@ output application/java
 p('error.unsupportedMediaType.code')]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
-			<flow-ref doc:name="error-handling:\response" doc:id="1f68218f-d91d-413d-bbce-0fc72d32a999" name="error-handling:\response" />
+			<flow-ref doc:name="error-handling:\response" doc:id="828429a8-4b27-4eeb-a336-c0cfead4f3b7" name="error-handling:\response" />
 		
 </on-error-propagate>	
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="e097aec7-5fb2-479f-aed8-2ad25da6d455" type="APIKIT:NOT_IMPLEMENTED" >
-			<ee:transform doc:name="Set HTTP Status = 501 &amp; errCode" doc:id="6c42a5ed-87bf-4ccf-8bb2-771147251bb7">
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="387c9f52-3a7d-4a0b-a80e-48fc9cf232f0" type="APIKIT:NOT_IMPLEMENTED" >
+			<ee:transform doc:name="Set HTTP Status = 501 &amp; errCode" doc:id="7d9af046-6867-46fe-8485-d77faa6884b5">
 				<ee:message />
 				<ee:variables>
 					<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
@@ -109,16 +109,16 @@ output application/java
 p('error.notImplemented.code')]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
-			<flow-ref doc:name="error-handling:\response" doc:id="c86a172c-a993-465a-ad8d-6e53d2d34df0" name="error-handling:\response" />
+			<flow-ref doc:name="error-handling:\response" doc:id="686512bb-c791-4438-bd60-7b8b93282908" name="error-handling:\response" />
 		
 </on-error-propagate>
 	
 	</error-handler>
 	
 	
-	<error-handler name="error-handling-app" doc:id="3a3d98b5-310b-43ae-a6fe-712cdc6dd464" >
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="c6ba30cc-260a-4708-981f-5bdbf54ec86e" type="HTTP:BAD_REQUEST">
-			<ee:transform doc:name="Set HTTP Status = 400 &amp; errCode" doc:id="a4f5c612-ba39-444b-97be-09a9076bc528" >
+	<error-handler name="error-handling-app" doc:id="026f383a-73bf-4b5d-9706-8a6b10fdcfc0" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="b802e205-5a21-40e5-8062-4e12322047d5" type="HTTP:BAD_REQUEST">
+			<ee:transform doc:name="Set HTTP Status = 400 &amp; errCode" doc:id="8de8782c-bfad-4215-b74c-1ab67794e81b" >
 				<ee:message />
 				<ee:variables >
 					<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
@@ -131,10 +131,10 @@ output application/java
 p('error.badRequest.code')]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
-			<flow-ref doc:name="error-handling:\response" doc:id="8111b110-69eb-470e-9729-971545592244" name="error-handling:\response" />
+			<flow-ref doc:name="error-handling:\response" doc:id="e49ef032-ae68-4360-91d6-9bddad45a2ac" name="error-handling:\response" />
 		</on-error-propagate>		
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="ae33e863-acd3-4d2b-8020-cf862db7c71f" type="HTTP:UNAUTHORIZED">
-			<ee:transform doc:name="Set HTTP Status = 401 &amp; errCode" doc:id="1bae160e-f5cf-486a-8f01-e66fcc7f0c01" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="1b180982-6493-4233-98e4-1cd1eb7386ca" type="HTTP:UNAUTHORIZED">
+			<ee:transform doc:name="Set HTTP Status = 401 &amp; errCode" doc:id="d95cd64e-ffb1-4995-ab90-cf1b35b8b9e6" >
 				<ee:message />
 				<ee:variables >
 					<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
@@ -147,10 +147,10 @@ output application/java
 p('error.notFound.code')]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
-			<flow-ref doc:name="error-handling:\response" doc:id="7a88143b-5167-4af6-9739-ac54393e759f" name="error-handling:\response" />
+			<flow-ref doc:name="error-handling:\response" doc:id="75aace65-a826-4379-a54e-d799fc988523" name="error-handling:\response" />
 		</on-error-propagate>
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d20a314e-72a3-4bb9-b815-ead23c8bbea7" type="HTTP:NOT_FOUND">
-			<ee:transform doc:name="Set HTTP Status = 404 &amp; errCode" doc:id="f98e1267-85aa-43c4-9e68-9a689c4bb720" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="9c9913bc-31f3-4990-bbdc-d30440a601c5" type="HTTP:NOT_FOUND">
+			<ee:transform doc:name="Set HTTP Status = 404 &amp; errCode" doc:id="68cfa836-c64b-4e29-8338-bb3295031ab1" >
 				<ee:message />
 				<ee:variables >
 					<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
@@ -163,10 +163,10 @@ output application/java
 p('error.notFound.code')]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
-			<flow-ref doc:name="error-handling:\response" doc:id="a534430f-29f9-4a11-b1d1-29b00dd34029" name="error-handling:\response" />
+			<flow-ref doc:name="error-handling:\response" doc:id="dd140cc3-0320-417c-874f-73a146be0d7b" name="error-handling:\response" />
 		</on-error-propagate>
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="af18b9fe-0745-4287-bf7d-2d52e88f48fa" type="HTTP:UNSUPPORTED_MEDIA_TYPE">
-			<ee:transform doc:name="Set HTTP Status = 415 &amp; errCode" doc:id="b2aad5aa-a3af-42fd-884d-50fc2d242f8b" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="dceed979-e0dc-471e-bfc9-637328e4f84b" type="HTTP:UNSUPPORTED_MEDIA_TYPE">
+			<ee:transform doc:name="Set HTTP Status = 415 &amp; errCode" doc:id="d314261a-f492-4660-be00-788055e0eaad" >
 				<ee:message />
 				<ee:variables >
 					<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
@@ -179,13 +179,13 @@ output application/java
 p('error.unsupportedMediaType.code')]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
-			<flow-ref doc:name="error-handling:\response" doc:id="ffb6889f-14f1-43fb-9bed-a2910da3ca96" name="error-handling:\response" />
+			<flow-ref doc:name="error-handling:\response" doc:id="5701ac40-8cca-469f-b83b-e190f636c394" name="error-handling:\response" />
 		</on-error-propagate>
-<!-- 		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="5d00eed3-7e78-4242-87e9-1009e770cf77" type="REQUEST_APP_ERROR:BAD_TREATMENT"> -->
-<!-- 			<flow-ref doc:name="already-defined-error-handling:\response" doc:id="ab207816-ca25-4ea5-8bbc-1dace79cffc3" name="already-defined-error-handling:\response" /> -->
+<!-- 		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="6f36cab5-39c3-4d4d-a3b5-d8933b9117d9" type="REQUEST_APP_ERROR:BAD_TREATMENT"> -->
+<!-- 			<flow-ref doc:name="already-defined-error-handling:\response" doc:id="c33d10f1-e1c9-4b70-adc4-ff910eba7f5a" name="already-defined-error-handling:\response" /> -->
 <!-- 		</on-error-continue>		 -->
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="7d8d6b8a-b747-4122-8774-c7cf5f9713c1" type="ANY">
-			<ee:transform doc:name="Set HTTP Status = 500 &amp; errCode" doc:id="62adade9-3a67-4dc0-9cc1-c252786847bd" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="0ec3dd70-baa2-4bcd-9503-5e5c501b24cd" type="ANY">
+			<ee:transform doc:name="Set HTTP Status = 500 &amp; errCode" doc:id="5f7ac24c-dafd-4519-8d39-3e759ba05eb5" >
 				<ee:message />
 				<ee:variables >
 					<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
@@ -198,7 +198,7 @@ output application/java
 p('error.any.code')]]></ee:set-variable>
 				</ee:variables>
 			</ee:transform>
-			<flow-ref doc:name="error-handling:\response" doc:id="767a5c63-28a9-41e4-8c86-27eafad3dba7" name="error-handling:\response" />
+			<flow-ref doc:name="error-handling:\response" doc:id="93dc6c8f-db9c-439c-bfe9-a19dc4f9efb0" name="error-handling:\response" />
 		</on-error-propagate>
 	</error-handler>
 	
@@ -206,9 +206,9 @@ p('error.any.code')]]></ee:set-variable>
 	
 	<!-- This service is mandatory to create the REQUEST_APP_ERROR:BAD_TREATMENT Error and make the app buildable if no used -->
 	<!-- This service is mandatory to create the SAPI:BAD_REQUEST Error and make the app buildable if no used -->
-<sub-flow name="error-handling:\response" doc:id="5438bbe1-d5b0-4814-b5ef-0b603e0a7e5f" >
-		<logger level="ERROR" doc:name="Failed Logger" doc:id="d84406ef-4216-4d22-aa4b-64fed2d56327" message='#[output application/json&#10;---&#10;error.exception.errorMessage.payload.error.message]'/>
-		<ee:transform doc:name="Set Error Response" doc:id="d0408bdb-d361-4a41-9b66-cbb23e238604">
+<sub-flow name="error-handling:\response" doc:id="ace2aa5a-b96a-4b57-8e92-b1df4cb41fb0" >
+		<logger level="ERROR" doc:name="Failed Logger" doc:id="1876a36e-72b5-4d58-b43c-8c5014ca4eaa" message='#[output application/json&#10;---&#10;error.exception.errorMessage.payload.error.message]'/>
+		<ee:transform doc:name="Set Error Response" doc:id="f43fd996-368f-4dbd-8fef-d9c1cbe5576b">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
