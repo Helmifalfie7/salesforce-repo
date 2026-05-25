@@ -8,7 +8,7 @@ http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mu
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 	<flow name="postAccount" doc:id="4ade5530-bbae-4af1-bc7f-11fb96fe54db" >
 		<logger level="INFO" doc:name="start flow" doc:id="a83200c6-3217-45f9-9a56-eb1101c75b7d" message="start post account flow"/>
-		<set-variable value="#[payload.pages.prompts.insured_name.answer.value[0]]" doc:name="clientName" doc:id="913167a6-ae59-4fa2-8fb0-e2743a79f4f4" variableName="clientName"/>
+		<set-variable value="#[vars.accountData.Name]" doc:name="clientName" doc:id="913167a6-ae59-4fa2-8fb0-e2743a79f4f4" variableName="clientName"/>
 		<choice doc:name="Choice" doc:id="b3572cba-4370-4230-a72f-c3a4f93c1685" >
 			<when expression="#[not isBlank(vars.clientName default '')]">
 				<salesforce:query doc:name="check client" doc:id="b18166bb-4777-450f-bfd2-d179bb0569ee" config-ref="Salesforce_Config" target="checkclient">
@@ -31,13 +31,26 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 output application/java
 ---
 [{
-    
-    "Name": vars.entryData.pages.prompts.insured_name.answer.value[0] ,
-    "Type": vars.entryData.pages.prompts.contacts.answer.value[0],
-    "BillingStreet": vars.entryData.pages.prompts.billing.answer.value[0],
-    "Description": vars.entryData.pages.prompts.description.answer.value[0],
-    "Industry": vars.entryData.pages.prompts.industry.answer.value[0],
-
+  "Name":               vars.accountData.Name,
+  "AccountNumber":      vars.accountData.AccountNumber       default "",
+  "Site":               vars.accountData.Site                default "",
+  "Industry":           vars.accountData.Industry            default "",
+  "Type":               vars.accountData."Type"              default "",
+  "Ownership":          vars.accountData.Ownership           default "",
+  "Rating":             vars.accountData.Rating              default "",
+  "AccountSource":      vars.accountData.AccountSource       default "",
+  "AnnualRevenue":      vars.accountData.AnnualRevenue       default 0,
+  "CurrencyIsoCode":    vars.accountData.CurrencyIsoCode     default "USD",
+  "NumberOfEmployees":  vars.accountData.NumberOfEmployees   default 0,
+  "BillingStreet":      vars.accountData.BillingAddress      default "",
+  "ShippingStreet":     vars.accountData.ShippingAddress     default "",
+  "Phone":              vars.accountData.Phone               default "",
+  "Fax":                vars.accountData.Fax                 default "",
+  "Website":            vars.accountData.Website             default "",
+  "Description":        vars.accountData.Description         default "",
+  "Jigsaw":             (vars.accountData.Jigsaw             default "")[0 to 19], 
+  "Sic":                vars.accountData.Sic                 default "",
+  "SicDesc":            vars.accountData.SicDesc             default ""
 }]]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
@@ -74,7 +87,7 @@ output application/java
 				<ee:set-variable variableName="emailcheck" ><![CDATA[%dw 2.0
 output application/json
 ---
-vars.entryData.pages.prompts.contactEmail.answer.value[0]]]></ee:set-variable>
+vars.contactData.Email]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
 		<salesforce:query doc:name="check existingcontact" doc:id="9b6d0bb0-0319-44b1-a93a-981f0ffce4c2" config-ref="Salesforce_Config" target="checkContact">
@@ -99,9 +112,23 @@ output application/java
 [{
     
     "AccountId": vars.accountId default vars.accountId2 , //accountId
-    "Email": vars.emailcheck ,
-    "LastName": vars.entryData.pages.prompts.insured_name.answer.value[0] default "Broker",
-    "Title": vars.entryData.pages.prompts.project_name.answer.value[0] //tocheck
+    "LastName":        vars.contactData.Name              default "Broker",
+  "AssistantName":   vars.contactData.AssistantName     default "",
+  "AssistantPhone":  vars.contactData.AssistantPhone    default "",
+  "Title":           vars.contactData.Title             default "",
+  "Department":      vars.contactData.Department        default "",
+  "Email":           vars.contactData.Email             default "",
+  "Phone":           vars.contactData.Phone             default "",
+  "MobilePhone":     vars.contactData.MobilePhone       default "",
+  "HomePhone":       vars.contactData.HomePhone         default "",
+  "OtherPhone":      vars.contactData.OtherPhone        default "",
+  "Fax":             vars.contactData.Fax               default "",
+  "MailingStreet":   vars.contactData.MailingAddress    default "",
+  "OtherStreet":     vars.contactData.OtherAddress      default "",
+  "LeadSource":      vars.contactData.LeadSource        default "",
+  "CurrencyIsoCode": vars.contactData.CurrencyIsoCode   default "USD",
+  "Description":     vars.contactData.Description       default "",
+  "Jigsaw":          vars.contactData.Jigsaw            default ""
 
 }]]]></ee:set-payload>
 			</ee:message>
@@ -136,12 +163,39 @@ output application/java
 [{
     "AccountId": vars.accountId default vars.accountId2 ,//accountId
     "ContactId": vars.contactId default vars.contactId2 , //contactId
-    "Description": vars.entryData.pages.prompts.description.answer.value[0],
-    "Type": vars.entryData.pages.prompts.tax_risk.answer.value[0],
-    "Product_Sub_Type__c": vars.entryData.pages.prompts.policy_type.answer.value[0],//
-    "Claim_Status__c": vars.entryData.pages.prompts.description.answer.value[0],
-    "CloseDate": vars.entryData.pages.prompts.deadline.answer.value[0]  ,
-    "Name": vars.entryData.pages.prompts.project_name.answer.value[0] default vars.entryData.pages.prompts.insured_name.answer.value[0] ,
+     "Name":                       vars.opportunityData.Name,
+  "StageName":                  vars.opportunityData.StageName              default "Quoted",
+  "CloseDate":                  vars.opportunityData.CloseDate,
+  "CurrencyIsoCode":            vars.opportunityData.CurrencyIsoCode        default "USD",
+  "Amount":                     vars.opportunityData.Amount                 default null,
+  "ExpectedRevenue":            vars.opportunityData.ExpectedRevenue        default null,
+  "Probability":                vars.opportunityData.Probability            default null,
+  "TotalOpportunityQuantity":   vars.opportunityData.TotalOpportunityQuantity default null,
+  "Type":                       vars.opportunityData.Type                   default "",
+  "LeadSource":                 vars.opportunityData.LeadSource             default "",
+  "ForecastCategoryName":       vars.opportunityData.ForecastCategoryName   default "Pipeline",
+  "Description":                vars.opportunityData.Description            default "",
+  "NextStep":                   vars.opportunityData.NextStep               default "",
+  "Budget_Confirmed__c":        vars.opportunityData.Budget_Confirmed__c    default "false",
+  "Discovery_Completed__c":     vars.opportunityData.Discovery_Completed__c default "false",
+  "ROI_Analysis_Completed__c":  vars.opportunityData.ROI_Analysis_Completed__c default "false",
+  "Account_Number__c":          vars.opportunityData.Account_Number__c      default "",
+  "Business_Sector__c":         vars.opportunityData.Business_Sector__c     default "",
+  "Taxpayer_Name__c":           vars.opportunityData.Taxpayer_Name__c       default "",
+  "Insured_Jurisdiction__c":    vars.opportunityData.Insured_Jurisdiction__c  default "",
+  "Key_Risk_Jurisdiction__c":   vars.opportunityData.Key_Risk_Jurisdiction__c  default "",
+  "Governing_Law__c":           vars.opportunityData.Governing_Law__c       default "",
+  "Product_Sub_Type__c":        vars.opportunityData.Product_Sub_Type__c    default "",
+  "Claim_Status__c":            vars.opportunityData.Claim_Status__c        default "",
+  "Loss_Reason__c":             vars.opportunityData.Loss_Reason__c         default "",
+  "NBI_Deadline__c":            vars.opportunityData.NBI_Deadline__c        default null,
+  "Risk_Layer__c":              vars.opportunityData.Risk_Layer__c          default "",
+  "Premium_Tax_Rate__c":        vars.opportunityData.Premium_Tax_Rate__c    default null,
+  "Broker_Commission__c":       vars.opportunityData.Broker_Commission__c   default "20.0",
+  "Binder_Fee__c":              vars.opportunityData.Binder_Fee__c          default "2.5",
+  "Devonshire_Commission__c":   vars.opportunityData.Devonshire_Commission__c default "10.0",
+  "Layer_Limit__c":             vars.opportunityData.Layer_Limit__c         default null,
+  "Devonshire_Limt_of_Layer__c": vars.opportunityData.Devonshire_Limt_of_Layer__c default null
 
 }]]]></ee:set-variable>
 			</ee:variables>

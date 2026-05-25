@@ -183,10 +183,18 @@ output application/json
 			<ee:message >
 			</ee:message>
 			<ee:variables >
-				<ee:set-variable variableName="entryData" ><![CDATA[%dw 2.0
+				<ee:set-variable variableName="accountData" ><![CDATA[%dw 2.0
 output application/json
 ---
-payload]]></ee:set-variable>
+payload.account]]></ee:set-variable>
+				<ee:set-variable variableName="contactData" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.contact]]></ee:set-variable>
+				<ee:set-variable variableName="opportunityData" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.opportunity]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
 		<flow-ref doc:name="postAccount" doc:id="873c242f-6ac5-4112-aeba-2013a94a6feb" name="postAccount"/>
